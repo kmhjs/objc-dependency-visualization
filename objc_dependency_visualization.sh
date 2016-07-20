@@ -1,7 +1,7 @@
 #! /usr/bin/env zsh
 
 # Initialize temporary file
-: > ./temp_graph_relation.dot
+: > /tmp/temp_graph_relation.dot
 
 # Select target files
 find . -iname '*.h' -or -iname '*.m' -or -iname '*.hh' -or -iname '*.mm' | \
@@ -36,18 +36,18 @@ while read filename; do;
 
   while read dest_filename; do;
     # Write out to temporary file
-    echo "\"${filename:t:r}\" -> \"${dest_filename:t:r}\";" >> temp_graph_relation.dot
+    echo "\"${filename:t:r}\" -> \"${dest_filename:t:r}\";" >> /tmp/temp_graph_relation.dot
   ; done
 ; done
 
 # Write out dot file
-: > ./temp_result_graph.dot
+: > /tmp/temp_result_graph.dot
 
-if [[ ! -f ./temp_graph_relation.dot ]]; then
+if [[ ! -f /tmp/temp_graph_relation.dot ]]; then
   echo 'Error: Could not find temporary file.' 1>&2
   return 1
 fi
-cat <<EOF > ./temp_result_graph.dot
+cat <<EOF > /tmp/temp_result_graph.dot
 digraph dependencies {
   graph [
     charset = "UTF-8",
@@ -70,28 +70,28 @@ digraph dependencies {
 EOF
 
 # Output graph file sorted by target file (or class) name.
-cat temp_graph_relation.dot | sort | uniq | sort -k3 >> ./temp_result_graph.dot
-echo '}' >> ./temp_result_graph.dot
+cat /tmp/temp_graph_relation.dot | sort | uniq | sort -k3 >> /tmp/temp_result_graph.dot
+echo '}' >> /tmp/temp_result_graph.dot
 
 # Rendering
-if [[ ! -f ./temp_result_graph.dot ]]; then
+if [[ ! -f /tmp/temp_result_graph.dot ]]; then
   echo 'Error: Could not find output file.' 1>&2
   return 1
 fi
-cp ./temp_result_graph.dot ./graph_${$(pwd):t:r}.dot
+cp /tmp/temp_result_graph.dot ./graph_${$(pwd):t:r}.dot
 
 if [[ -x $(which dot) ]]; then
   # If no "dot" command found, just clean up temporary file, and keep result dot file.
-  dot -Tpdf temp_result_graph.dot -o graph_${$(pwd):t:r}.pdf
+  dot -Tpdf /tmp/temp_result_graph.dot -o graph_${$(pwd):t:r}.pdf
 else
   echo 'Error: Could not find "dot" command.' 1>&2
 fi
 
 # Clean up
-if [[ -f ./temp_graph_relation.dot ]]; then
-  rm -f ./temp_graph_relation.dot
+if [[ -f /tmp/temp_graph_relation.dot ]]; then
+  rm -f /tmp/temp_graph_relation.dot
 fi
 
-if [[ -f ./temp_result_graph.dot ]]; then
-  rm -f ./temp_result_graph.dot
+if [[ -f /tmp/temp_result_graph.dot ]]; then
+  rm -f /tmp/temp_result_graph.dot
 fi
