@@ -1,7 +1,12 @@
 #! /usr/bin/env zsh
 
+# Initialize file paths
+temp_relation_file_path=/tmp/temp_graph_relation.dot
+temp_result_file_path=/tmp/temp_result_graph.dot
+output_file_name=graph_${$(pwd):t:r}
+
 # Initialize temporary file
-: > /tmp/temp_graph_relation.dot
+: > ${temp_relation_file_path}
 
 # Select target files
 find . -iname '*.h' -or -iname '*.m' -or -iname '*.hh' -or -iname '*.mm' | \
@@ -36,18 +41,18 @@ while read filename; do;
 
   while read dest_filename; do;
     # Write out to temporary file
-    echo "\"${filename:t:r}\" -> \"${dest_filename:t:r}\";" >> /tmp/temp_graph_relation.dot
+    echo "\"${filename:t:r}\" -> \"${dest_filename:t:r}\";" >> ${temp_relation_file_path}
   ; done
 ; done
 
 # Write out dot file
-: > /tmp/temp_result_graph.dot
+: > ${temp_result_file_path}
 
-if [[ ! -f /tmp/temp_graph_relation.dot ]]; then
+if [[ ! -f ${temp_relation_file_path} ]]; then
   echo 'Error: Could not find temporary file.' 1>&2
   return 1
 fi
-cat <<EOF > /tmp/temp_result_graph.dot
+cat <<EOF > ${temp_result_file_path}
 digraph dependencies {
   graph [
     charset = "UTF-8",
@@ -70,28 +75,28 @@ digraph dependencies {
 EOF
 
 # Output graph file sorted by target file (or class) name.
-cat /tmp/temp_graph_relation.dot | sort | uniq | sort -k3 >> /tmp/temp_result_graph.dot
-echo '}' >> /tmp/temp_result_graph.dot
+cat ${temp_relation_file_path} | sort | uniq | sort -k3 >> ${temp_result_file_path}
+echo '}' >> ${temp_result_file_path}
 
 # Rendering
-if [[ ! -f /tmp/temp_result_graph.dot ]]; then
+if [[ ! -f ${temp_result_file_path} ]]; then
   echo 'Error: Could not find output file.' 1>&2
   return 1
 fi
-cp /tmp/temp_result_graph.dot ./graph_${$(pwd):t:r}.dot
+cp ${temp_result_file_path} ./${output_file_name}.dot
 
 if [[ -x $(which dot) ]]; then
   # If no "dot" command found, just clean up temporary file, and keep result dot file.
-  dot -Tpdf /tmp/temp_result_graph.dot -o graph_${$(pwd):t:r}.pdf
+  dot -Tpdf ${temp_result_file_path} -o ${output_file_name}.pdf
 else
   echo 'Error: Could not find "dot" command.' 1>&2
 fi
 
 # Clean up
-if [[ -f /tmp/temp_graph_relation.dot ]]; then
-  rm -f /tmp/temp_graph_relation.dot
+if [[ -f ${temp_relation_file_path} ]]; then
+  rm -f ${temp_relation_file_path}
 fi
 
-if [[ -f /tmp/temp_result_graph.dot ]]; then
-  rm -f /tmp/temp_result_graph.dot
+if [[ -f ${temp_result_file_path} ]]; then
+  rm -f ${temp_result_file_path}
 fi
