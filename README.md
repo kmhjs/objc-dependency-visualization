@@ -1,7 +1,7 @@
 objc-dependency-visualization
 ===
 
-This project is for visualization of dependencies ( `import` / `include` ) between codes.
+This project is for visualization of dependencies between Objective-C (Xcode project) codes.
 
 ## Dependencies
 
