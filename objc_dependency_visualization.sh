@@ -1,12 +1,20 @@
 #! /usr/bin/env zsh
 
+#
 # Initialize file paths
+#
 temp_relation_file_path=/tmp/temp_graph_relation.dot
 temp_result_file_path=/tmp/temp_result_graph.dot
 output_file_name=graph_${$(pwd):t:r}
 
+#
 # Initialize temporary file
+#
 : > ${temp_relation_file_path}
+
+#
+# Write out dependencies to temporary file
+#
 
 # Select target files
 # If you want to exclude implementation (.m) file, switch to '.h' and '.hh' file check line.
@@ -47,13 +55,16 @@ while read filename; do;
   ; done
 ; done
 
-# Write out dot file
+#
+# Write out .dot file
+#
 : > ${temp_result_file_path}
 
 if [[ ! -f ${temp_relation_file_path} ]]; then
   echo 'Error: Could not find temporary file.' 1>&2
   return 1
 fi
+
 cat <<EOF > ${temp_result_file_path}
 digraph dependencies {
   graph [
@@ -76,11 +87,15 @@ digraph dependencies {
   ];
 EOF
 
+#
 # Output graph file sorted by target file (or class) name.
+#
 cat ${temp_relation_file_path} | sort | uniq | sort -k3 >> ${temp_result_file_path}
 echo '}' >> ${temp_result_file_path}
 
+#
 # Rendering
+#
 if [[ ! -f ${temp_result_file_path} ]]; then
   echo 'Error: Could not find output file.' 1>&2
   return 1
@@ -91,10 +106,12 @@ if [[ -x $(which dot) ]]; then
   # If no "dot" command found, just clean up temporary file, and keep result dot file.
   dot -Tpdf ${temp_result_file_path} -o ${output_file_name}.pdf
 else
-  echo 'Error: Could not find "dot" command.' 1>&2
+  echo 'Could not find "dot" command. Extract only .dot file.' 1>&2
 fi
 
+#
 # Clean up
+#
 if [[ -f ${temp_relation_file_path} ]]; then
   rm -f ${temp_relation_file_path}
 fi
