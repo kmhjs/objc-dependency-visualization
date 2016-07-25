@@ -9,7 +9,9 @@ output_file_name=graph_${$(pwd):t:r}
 : > ${temp_relation_file_path}
 
 # Select target files
+# If you want to exclude implementation (.m) file, switch to '.h' and '.hh' file check line.
 find . -iname '*.h' -or -iname '*.m' -or -iname '*.hh' -or -iname '*.mm' | \
+#find . -iname '*.h' -or -iname '*.hh' | \
 
 # If you want to enable test files, disable following one line.
 # May be you need to add some rules to regular expression.
@@ -34,7 +36,7 @@ while read filename; do;
   sort | uniq | \
 
   # Apply exceptions
-  egrep -v '(Foundation\.h|Cocoa\.h|UIKit\.h)' | \
+  egrep -v '^(Foundation\.h|Cocoa\.h|UIKit\.h)' | \
 
   # Remove arrow to self
   egrep -v "($(echo ${filename:t:r} | sed 's/\+/\\\+/').h|$(echo ${filename:t:r} | sed 's/\+/\\\+/'))" | \
