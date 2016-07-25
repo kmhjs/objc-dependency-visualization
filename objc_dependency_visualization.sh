@@ -90,7 +90,12 @@ EOF
 #
 # Output graph file sorted by target file (or class) name.
 #
+
+# If you want to change sorting rule (sort key), switch following line.
+# Default sorting key is import (or include) target file name. : `sort -k3`
 cat ${temp_relation_file_path} | sort | uniq | sort -k3 >> ${temp_result_file_path}
+#cat ${temp_relation_file_path} | sort | uniq | sort -k1 >> ${temp_result_file_path}
+
 echo '}' >> ${temp_result_file_path}
 
 #
