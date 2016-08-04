@@ -47,7 +47,7 @@ while read filename; do;
   egrep -v '^(Foundation\.h|Cocoa\.h|UIKit\.h)' | \
 
   # Remove arrow to self
-  egrep -v "($(echo ${filename:t:r} | sed 's/\+/\\\+/').h|$(echo ${filename:t:r} | sed 's/\+/\\\+/'))" | \
+  egrep -v "^($(echo ${filename:t:r} | sed 's/\+/\\\+/').h|$(echo ${filename:t:r} | sed 's/\+/\\\+/'))$" | \
 
   while read dest_filename; do;
     # Write out to temporary file
